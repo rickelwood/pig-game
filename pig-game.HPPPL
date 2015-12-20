@@ -1,0 +1,306 @@
+// Pig Game - By Rick Elwood
+// Created for HP Prime graphing calculator
+//
+// Run program, use 'R' to roll 'H' to hold
+// If player rolls a 1 they lose their current 
+// score and turn. If you chose to hold your current
+// score gets added to your total score and  you
+// pass your turn to the AI. First to real 100 points
+// wins the game.
+
+//Constants
+WINNING_SCORE:=100;     // score needed to win
+MAX_BEFOREHOLD:=15;     // max score needed till computer will hold 
+WIDTH:=320;
+HEIGHT:=240;
+BLACK:=#0h;
+WHITE:=#FFFFFFh;
+BLUE:=#66CCFFh;
+GREEN:=#66FF99h;
+GRAY:=#CCCCCCh;
+ORANGE:=#FFCC66h;
+PINK:=#CC99FFh;
+YELLOW:=#FFFFCC;
+RED:=#FF0000h;
+ESC_KEY:=4;
+angfac;
+bullits:={};
+
+// Declare Varables
+local score_pt;         // total player score
+local score_pc;         // current player score
+local score_cc;         // current player score
+local score_ct;         // current player score
+local die_value,die_valuet;        // die
+local player_turn, finished, keypl, wti,wti2,fader,fader_flag;
+
+// functions
+die_animaiton();
+computer_win();
+player_win();
+
+
+EXPORT pig()
+BEGIN
+    // Initialize Varables
+    score_pt:=0;         // total player score
+    score_pc:=0;         // current player score
+    score_cc:=0;         // current player score
+    score_ct:=0;         // current player score
+    die_value:=0;        // die
+    player_turn:=1;      // Current turn number
+    finished:=0;
+    keypl :=0;
+
+    //Graphics
+    dimgrob_p(G1, 320, 240);    // background
+    rect_p(G1,0,0,319,239,0);   // black background
+    dimgrob_p(G2, 320, 240);    // playground
+    dimgrob_p(G3, 320, 240);    // start text pre-rendered
+    dimgrob_p(G4, 320, 240);    // start text pre-rendered
+    dimgrob_p(G5, 320, 240);    // start text pre-rendered
+    
+    //player_win();   uncomment to view win / loss screens
+    //computer_win();
+
+    // Welcome screen
+    rect_p(G0,0,0,319,239,0);   // black out screen (add please wait?)
+    textout_p("Pig",G0,118,90,7,WHITE,300,BLACK);
+    textout_p("Press Any Key to Start",G0,103,160,2,WHITE,300,BLACK);
+    textout_p("v0.16 Beta",G0,155,104,1,BLUE,300,BLACK);
+
+    WAIT(-1);
+
+    // Display Block
+    rect_p(G0,0,0,319,239,0);   // black out screen 
+
+    // main loop
+    repeat
+        textout_p("Player 1: " + score_pt,G0,12,10,2,BLUE,300,BLACK);
+        textout_p("Computer: " + score_ct,G0,234,10,2,GRAY,300,BLACK);
+        textout_p("Player 1's Turn",G0,95,55,6,BLUE,300,BLACK);
+        textout_p("Current Roll",G0,115,88,4,GRAY,300,BLACK);
+        textout_p(die_value,G0,154,110,7,WHITE,300,BLACK);
+        textout_p("Turn Score: " + score_pc + "  ",G0,115,140,3,GREEN,300,BLACK);
+        textout_p("Press [R] to Roll",G0,15,190,2,WHITE,300,BLACK);
+        textout_p("Press [H] to Hold",G0,222,190,2,WHITE,300,BLACK);
+        textout_p("Press [Esc] to Quit",G0,236,230,1,#666666h,300,BLACK);
+        keypl:=WAIT(-1);
+        // Player Turn Section
+        if (keypl == 4) then
+            finished:=1;
+        END;
+
+        if (keypl == 22) then // Hold
+            score_pt := score_pt + score_pc;
+            score_pc:=0;
+            textout_p("Turn Score: " + score_pc + "  ",G0,115,140,3,GREEN,300,BLACK);
+            textout_p("Player 1: " + score_pt + "  ",G0,12,10,2,BLUE,300,BLACK);
+            player_turn:=0;
+            die_value:=0;
+            case
+                if (score_pt > 99)
+                THEN
+                    finished :=1;
+                    player_turn:=1;
+                END;
+            END;
+        END;
+
+        if (keypl  == 33) then // Roll
+            die_animaiton();
+            die_value := RANDINT(1,6);
+            textout_p(die_value,G0,154,110,7,WHITE,300,BLACK);
+            if (die_value == 1) then
+                player_turn:=0;
+                score_pc:=0;
+                WAIT(.8); //pause to see the 1 before the computer plays
+                textout_p("Turn Score: " + score_pc + "  ",G0,115,140,3,GREEN,300,BLACK);
+                die_value:=0;
+            ELSE
+                score_pc := score_pc + die_value;
+                textout_p("Turn Score: " + score_pc + "  ",G0,115,140,3,GREEN,300,BLACK);
+
+            END;
+        END;
+        if (player_turn==0) then
+            // Display Block
+            die_value:=0;
+            rect_p(G0,0,0,319,239,0);   // black out screen 
+            textout_p("Player 1: " + score_pt,G0,12,10,2,BLUE,300,BLACK);
+            textout_p("Computer: " + score_ct,G0,234,10,2,GRAY,300,BLACK);
+            textout_p("Computer's Turn",G0,80,55,6,GRAY,300,BLACK);
+            textout_p("Current Roll",G0,115,88,4,#666666h,300,BLACK);
+            textout_p(die_value,G0,154,110,7,WHITE,300,BLACK);
+            textout_p("Turn Score: " + score_cc + "  ",G0,115,140,3,GRAY,300,BLACK);
+            textout_p("Computer's Turn",G0,236,230,1,#666666h,300,BLACK);
+            repeat
+                if (player_turn == 0) then
+                    case
+                        if (score_cc < 9) then
+                            textout_p(" Computer choses to Roll ",G0,72,180,3,WHITE,300,BLACK);
+                            die_animaiton();
+                            die_value := RANDINT(1,6);
+                            textout_p(die_value,G0,154,110,7,WHITE,300,BLACK);
+                            case
+                                if (die_value == 1) then
+                                    player_turn:=1;
+                                    score_cc:=0;
+                                    WAIT(.9); //pause to see the 1 before the computer plays
+                                    rect_p(G0,0,0,319,239,0);   // black out screen 
+                                    die_value:=0;
+
+                                END;
+                                if (die_value > 1) then
+                                    score_cc := score_cc + die_value;
+                                    textout_p("Turn Score: " + score_cc + "  ",G0,115,140,3,GRAY,300,BLACK);
+                                    WAIT(.5); //pause to see the 1 before the computer plays
+                                END; //if 
+
+                            end; //case
+                        end; //if
+                        if (score_cc > 8) then // Hold
+                            textout_p(" Computer choses to Hold ",G0,72,180,3,WHITE,300,BLACK);
+                            score_ct := score_ct + score_cc;
+                            score_cc:=0;
+                            textout_p("Turn Score: " + score_cc + "  ",G0,115,140,3,GRAY,300,BLACK);
+                            textout_p("Computer: " + score_ct,G0,234,10,2,GRAY,300,BLACK);
+                            player_turn:=1;
+                            wait(.9);
+                            rect_p(G0,0,0,319,239,0);   // black out screen 
+                            die_value:=0;
+                            case
+                                if (score_ct > 99)
+                                THEN
+                                    finished :=1;
+                                END;
+                            END;
+                        END;
+                    end; //case
+
+                end; //if 
+            until (player_turn <> 0);
+        end
+    until finished ==1; // repeat
+
+    if (score_pt > 99) then
+        player_win();
+    end;
+    if (score_ct > 99) then
+        computer_win();
+    end;
+
+
+    //rect_p(G0,109,90,209,95,#BBBBBBh);   // allignment
+    freeze;
+END;
+
+die_animaiton()
+begin
+    wti:=1;
+    repeat
+        die_valuet := RANDINT(1,6);
+        textout_p(die_valuet,G0,154,110,7,WHITE,300,BLACK);
+        wait(.05);
+        wti:=wti + 1;
+    until wti > 20;
+end;
+
+player_win()
+begin
+    LOCAL xx,yy,j,i,tik,count,v,a;
+    LOCAL rc;
+    LOCAL colors:= {{#00FFFFh,#009999h,#004D4Dh},
+                    {#00FF00h,#009900h,#004D00h},
+                    {#FFFF00h,#999900h,#4C4D00h},
+                    {#FF0000h,#990000h,#4D0000h},
+                    {#0000FFh,#000099h,#00004Dh},
+                    {#7D00FFh,#4A0099h,#25004Dh},
+                    {#FFFFFFh,#999999h,#4D4D4Dh}};
+    fader_flag=#F00000h;
+    fader=#EEEEEEh;
+    wti:=1;
+    repeat
+        rect_p(G5,0);   // black out screen (add please wait?)
+        textout_p("Player 1 Wins!",G5,105,wti,6,GREEN,300,BLACK);
+        wait(.009);
+        wti:=wti+1;
+        blit_p(G0,G5);
+    until wti > 100;
+    // Mist
+    GETKEY;
+
+  REPEAT
+    IF HAngle=0 THEN // detect angle mode
+      angfac:=2*π;
+    ELSE
+      angfac:=360;
+    END;
+    xx:=RANDINT(20,300);
+    yy:=RANDINT(20,100);
+    FOR j FROM 1 TO 45 DO
+      bullits(j,1):=xx;
+      bullits(j,2):=yy;
+      v:=RANDOM(1,8);
+      a:=RANDOM(angfac);
+      bullits(j,3):=v*SIN(a);
+      bullits(j,4):=v*COS(a);
+      bullits(j,5):=1;   
+    END;
+    rc:=RANDINT(1,7);
+    FOR j FROM 1 TO 1000 DO
+      tik:=TICKS()+50;
+      RECT_P(G1,0);
+      FOR i FROM 1 TO 45 DO // move it
+        if bullits(i,5) THEN
+          RECT_P(G1,bullits(i,1)-bullits(i,3),bullits(i,2)-bullits(i,4)-0.3,bullits(i,1)-bullits(i,3)+1,bullits(i,2)-bullits(i,4)-0.3+1,colors(rc,3));
+          RECT_P(G1,bullits(i,1),bullits(i,2),bullits(i,1)+1,bullits(i,2)+1,colors(rc,2));
+          bullits(i,1):=bullits(i,1)+bullits(i,3);
+          bullits(i,2):=bullits(i,2)+bullits(i,4);
+          bullits(i,4):=bullits(i,4)+0.3;
+          if bullits(i,1)<0 OR 
+            bullits(i,1)>320 OR 
+            bullits(i,2)<0 OR
+            bullits(i,2)>240 THEN
+            bullits(i,5):=0;
+          END; //if
+        END; //if
+      END; //for
+      count:=0;
+      textout_p("Player 1 Wins!",G1,105,wti,6,GREEN,300);
+      textout_p("     Press Any Key to Exit ",G1,83,160,3,GRAY,300);
+      FOR i FROM 1 TO 45 DO
+        IF bullits(i,5) THEN
+          RECT_P(G1,bullits(i,1),bullits(i,2),bullits(i,1)+1,bullits(i,2)+1,colors(rc,1));
+          count:=count+1;
+        END; //if
+      END;//for
+      IF count==0 THEN BREAK; END;
+      BLIT_P(G1);
+        WHILE tik > TICKS() DO WAIT(0.004); END;
+    END;//for 1 to 1000
+  UNTIL GETKEY <> -1;
+    END;
+
+
+computer_win()
+begin
+    wti:=1;
+    repeat
+        rect_p(G3,0,0,319,239,0);   // black out screen (add please wait?)
+        textout_p("Computer Wins!",G3,95,wti,6,WHITE,300,BLACK);
+        blit_p(G0,G3); // display it
+        wait(.01);
+        wti:=wti+1;
+    until wti > 100;
+    wti2:=238;
+    repeat
+        rect_p(G3,0,0,319,239,0);   // black out screen (add please wait?)
+        textout_p("Computer Wins!",G3,95,wti,6,WHITE,300,BLACK);
+        textout_p("     Game Over",G3,95,wti2,5,RED,300,BLACK);
+        blit_p(G0,G3); // display it
+        wait(.01);
+        wti2:=wti2-1;
+    until wti2 < 140;
+    wait(-1);
+end;
