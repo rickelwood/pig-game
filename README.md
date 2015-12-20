@@ -1,6 +1,5 @@
-# Pig Game v0.16 
-#### For the HP Prime graphing calculator 
-###### By Rick Elwood
+## Pig Game v0.16 
+#### For the HP Prime graphing calculator - By Rick Elwood
 
 Start screen and gameplay:
 
